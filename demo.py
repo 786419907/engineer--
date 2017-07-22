@@ -125,4 +125,4 @@ if __name__ == '__main__':
         except:
             print('爬取失败')
     time_end = time.time()
-    print(str((time_end - time_start) / 60) + ':' + str((time_end - time_start) % 60))
+    print(str((time_end - time_start) / 60))
