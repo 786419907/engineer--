@@ -1,9 +1,9 @@
 # coding:utf-8
 '''
-@author:                   Kai
-LoginHNNU:                 登录接口
-DownloadPersonalIcon：              爬头像
-DownloadPersonExam:        爬个人成绩
+@author:                    Kai
+LoginHNNU:                  登录接口
+DownloadPersonalIcon：      爬头像
+DownloadPersonExam:         爬个人成绩
 DownloadPersonInformation： 爬个人信息
 '''
 from bs4 import BeautifulSoup
@@ -41,13 +41,13 @@ def DownloadPersonalIcon(url,name):
     # 这里必须要用同一个session来发请求，教务系统必须验证session后才能下载图片，之前遇到坑，天真的以为获取到链接就可以下载了
     icon = session.get(url)
     # E盘的icon_folder文件夹里用流写头像,这里就很喜欢python了，以前java里读写I/O至少要十来行，还要用到缓冲Buffer、关闭流之类的，手写好痛苦，现在python用2行代码就搞定
-    with open('E:/icon_folder/'+ name +'.png','wb',errors='ignore') as f:
+    with open('E:/icon_folder/'+ name +'.png','wb') as f:
         f.write(icon.content)
         
 def DownloadPersonInformation(url):
     # 美丽汤解析
     html_content = session.get(url,headers=headers).content.decode('gb2312')
-    soup = BeautifulSoup(html_content,'html.parser')
+    soup = BeautifulSoup(html_content,'html.parser',from_encoding='utf-8')
     name_item = soup.find('font',attrs={'color' : 'red'})
     name = name_item.get_text()
     items_all = soup.find('table',id='table1').findAll('td',attrs={'height':'22'})
@@ -63,7 +63,7 @@ def DownloadPersonInformation(url):
     info_dict['政治面貌']  = items_all[15].get_text()
     info_dict['身份证号码'] = items_all[18].get_text()
     info_dict['高考考生号'] = items_all[19].get_text()
-    with open('E:/info.txt','a+',encoding = 'gb2312',errors='ignore') as f:
+    with open('E:/info.txt','a+',encoding = 'utf-8',errors='ignore') as f:
         for key,value in info_dict.items():
             f.write(key + ':' + value + '  ')
         f.write('\n')
@@ -76,7 +76,7 @@ def DownloadPersonExam(name):
     #这里的'Referer'是重点啊，之前爬了好几次都是空数据，以为data里少了什么参数，对比了请求头后发现服务器都对referer做了监控，无referer或假referer都被认定为非法访问。
     headers = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36','Referer' : 'http://211.70.176.123/wap/cjcx.asp'}
     html_content = session.get(url,headers = headers).content.decode('gb2312')
-    soup = BeautifulSoup(html_content,'html.parser')
+    soup = BeautifulSoup(html_content,'html.parser',from_encoding='utf-8')
     crumb_item = soup.find('input',attrs = {'name' : "crumb"})
     str_item = str(crumb_item)
     str_split = str_item.split('"')
@@ -90,7 +90,7 @@ def DownloadPersonExam(name):
             }
     html_content = session.post(url,data = data,headers = headers).content.decode('gb2312')
     # 汤美丽解析
-    soup = BeautifulSoup(html_content,'html.parser')
+    soup = BeautifulSoup(html_content,'html.parser',from_encoding='utf-8')
     # 获得考试科目
     scores_name_list = []
     scores_name = soup.findAll('a',href = "#")
@@ -101,7 +101,7 @@ def DownloadPersonExam(name):
     scores_score = soup.findAll('a',href = re.compile(r'^kcpm2.asp'))
     for score_score in scores_score:
         scores_score_list.append(score_score.get_text())
-    with open('E:/exam.txt','a+',encoding = 'gb2312',errors='ignore') as f:
+    with open('E:/exam.txt','a+',encoding = 'utf-8',errors='ignore') as f:
         f.write(name+'  :  ')
         for index,value in enumerate(scores_name_list):
             f.write(value + ':' + scores_score_list[index] + '    ')
